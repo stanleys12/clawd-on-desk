@@ -263,6 +263,7 @@ function update(api, o = {}) {
       codexSource: o.codexSource ?? null,
       dshCarrier: o.dshCarrier ?? null,
       ghosttyTerminalId: o.ghosttyTerminalId ?? null,
+      entrypoint: o.entrypoint ?? null,
       assistantLastOutput: o.assistantLastOutput ?? null,
       assistantLastOutputTruncated: o.assistantLastOutputTruncated ?? false,
       toolName: o.toolName ?? null,
@@ -1896,6 +1897,12 @@ describe("updateSession()", () => {
     update(api, { id: "sticky1", state: "working", model: "claude-opus-5" });
     update(api, { id: "sticky1", state: "working", event: "PostToolUse" });
     assert.strictEqual(api.sessions.get("sticky1").model, "claude-opus-5");
+  });
+
+  it("keeps the IDE entrypoint when a later event reports none", () => {
+    update(api, { id: "ide1", state: "working", entrypoint: "claude-vscode" });
+    update(api, { id: "ide1", state: "working", event: "PostToolUse" });
+    assert.strictEqual(api.sessions.get("ide1").entrypoint, "claude-vscode");
   });
 
   it("stores only a normalized route-owned session automation assessment", () => {

@@ -183,6 +183,19 @@ describe("buildStateBody", () => {
     assert.strictEqual(body.model, undefined);
   });
 
+  it("reports the VS Code extension entrypoint and nothing for other entrypoints", () => {
+    const previous = process.env.CLAUDE_CODE_ENTRYPOINT;
+    try {
+      process.env.CLAUDE_CODE_ENTRYPOINT = "claude-vscode";
+      assert.strictEqual(buildStateBody("PreToolUse", { session_id: "s" }, mockResolve).entrypoint, "claude-vscode");
+      process.env.CLAUDE_CODE_ENTRYPOINT = "cli";
+      assert.strictEqual(buildStateBody("PreToolUse", { session_id: "s" }, mockResolve).entrypoint, undefined);
+    } finally {
+      if (previous === undefined) delete process.env.CLAUDE_CODE_ENTRYPOINT;
+      else process.env.CLAUDE_CODE_ENTRYPOINT = previous;
+    }
+  });
+
   for (const [label, model] of [
     ["blank", "  \t "],
     ["overlong", "m".repeat(129)],

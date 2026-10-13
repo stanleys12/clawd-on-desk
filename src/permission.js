@@ -3133,6 +3133,8 @@ function buildPermissionBubblePayload(permEntry) {
     // DSH has a downstream native web answerer. Its first-release bubble must
     // not render Go to Terminal because that action has no decision meaning.
     isDsh: permEntry.isDsh || false,
+    // The Claude Code VS Code extension ignores the hook decision for ExitPlanMode.
+    planReviewInIde: permEntry.agentId === "claude-code" && !!sess && sess.entrypoint === "claude-vscode",
     // Display-only detail for the passive Kimi notify card: the real tool
     // name plus the whitelisted tool_input subset let the renderer reuse the
     // standard cue path (formatDetail) while the card stays dismiss-only.

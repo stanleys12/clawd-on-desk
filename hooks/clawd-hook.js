@@ -687,6 +687,9 @@ function buildStateBody(event, payload, resolve) {
   // omits it). state.js merges it stickily, so one report is enough.
   const model = normalizeModelId(payload.model);
   if (model) body.model = model;
+  // Only the VS Code extension needs telling apart: it ignores the hook's
+  // ExitPlanMode decision. A terminal inside VS Code still reports editor=code.
+  if (process.env.CLAUDE_CODE_ENTRYPOINT === "claude-vscode") body.entrypoint = "claude-vscode";
   const toolName = typeof payload.tool_name === "string" && payload.tool_name ? payload.tool_name : null;
   const toolUseId = normalizeToolUseId(payload.tool_use_id ?? payload.toolUseId ?? payload.toolUseID);
   const toolInputFingerprint = buildToolInputFingerprint(

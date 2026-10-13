@@ -331,7 +331,7 @@ describe("permission bubble terminal fallback (issue #689)", () => {
     assert.deepStrictEqual(harness.decisions, ["deny-and-focus"]);
   });
 
-  it("keeps plan review's single terminal action and deny-and-focus semantics", () => {
+  function showPlanReview(extra = {}) {
     const harness = createHarness();
     harness.show({
       toolName: "ExitPlanMode",
@@ -340,11 +340,27 @@ describe("permission bubble terminal fallback (issue #689)", () => {
         planFeedback: true,
         nativeFallback: true,
       }),
+      ...extra,
     });
+    return harness;
+  }
+
+  it("keeps plan review's single terminal action and deny-and-focus semantics", () => {
+    const harness = showPlanReview();
 
     const buttons = harness.terminalButtons();
     assert.strictEqual(buttons.length, 1);
     buttons[0].click();
+    assert.deepStrictEqual(harness.decisions, ["deny-and-focus"]);
+  });
+
+  it("sends a VS Code extension plan review to the IDE panel instead of allowing it", () => {
+    const harness = showPlanReview({ planReviewInIde: true });
+
+    assert.strictEqual(harness.element("btnAllow").textContent, "Approve in IDE");
+    assert.strictEqual(harness.element("btnDeny").style.display, "none");
+    assert.deepStrictEqual(harness.actionTexts(), []);
+    harness.element("btnAllow").click();
     assert.deepStrictEqual(harness.decisions, ["deny-and-focus"]);
   });
 });

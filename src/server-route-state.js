@@ -401,6 +401,7 @@ function handleStatePost(req, res, options) {
       const ghosttyTerminalId = typeof data.ghostty_terminal_id === "string" && data.ghostty_terminal_id.trim()
         ? data.ghostty_terminal_id.trim()
         : null;
+      const entrypoint = data.entrypoint === "claude-vscode" ? data.entrypoint : null;
       const toolName = typeof data.tool_name === "string" && data.tool_name ? data.tool_name : null;
       const subagentLifecycleSource = (
         data.subagent_lifecycle_source === "native"
@@ -1136,6 +1137,7 @@ function handleStatePost(req, res, options) {
             codexSource,
             dshCarrier,
             ghosttyTerminalId,
+            entrypoint,
             displayHint: display_svg,
             sessionTitle,
             sessionTitleFromPrompt,

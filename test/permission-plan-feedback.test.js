@@ -418,3 +418,25 @@ describe("permission plan-feedback handleDecide routing (IPC entry point)", () =
     );
   });
 });
+
+describe("permission plan review in the Claude Code VS Code extension", () => {
+  it("marks the plan card for IDE approval only when the session came from the extension", () => {
+    const ctx = makeCtx({
+      sessions: new Map([
+        ["ide-session", { cwd: "/repo", entrypoint: "claude-vscode" }],
+        ["cli-session", { cwd: "/repo" }],
+      ]),
+    });
+    const perm = initPermission(ctx);
+
+    const idePayload = perm.buildPermissionBubblePayload(
+      makePlanPermEntry(createMockResponse(), { sessionId: "ide-session" })
+    );
+    const cliPayload = perm.buildPermissionBubblePayload(
+      makePlanPermEntry(createMockResponse(), { sessionId: "cli-session" })
+    );
+
+    assert.strictEqual(idePayload.planReviewInIde, true);
+    assert.strictEqual(cliPayload.planReviewInIde, false);
+  });
+});
