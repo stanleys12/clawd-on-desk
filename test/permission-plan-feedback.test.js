@@ -145,6 +145,19 @@ function makeEventFor(bubble) {
   return { sender: { __win: bubble } };
 }
 
+describe("permission plan-review bubble payload", () => {
+  it("flags plan reviews from the Claude Code VS Code extension for IDE approval", () => {
+    const ctx = makeCtx();
+    const perm = initPermission(ctx);
+    const permEntry = makePlanPermEntry(createMockResponse());
+
+    ctx.sessions.set(permEntry.sessionId, { claudeEntrypoint: "claude-vscode" });
+    assert.strictEqual(perm.buildPermissionBubblePayload(permEntry).approveInIde, true);
+    ctx.sessions.set(permEntry.sessionId, { claudeEntrypoint: "cli" });
+    assert.strictEqual(perm.buildPermissionBubblePayload(permEntry).approveInIde, false);
+  });
+});
+
 describe("permission plan-feedback handleDecide", () => {
   it("replays the exact original ExitPlanMode input when allowing a plan", () => {
     const ctx = makeCtx();

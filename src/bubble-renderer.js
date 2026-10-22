@@ -116,6 +116,7 @@ const BUBBLE_STRINGS = {
     planReview: "Plan Review",
     approve: "Approve",
     reject: "Reject",
+    approveInIde: "Approve in IDE",
     tellClaudeWhatToChange: "Suggest changes",
     planFeedbackPlaceholder: "What should be changed?",
     submitFeedback: "Send",
@@ -171,6 +172,7 @@ const BUBBLE_STRINGS = {
     planReview: "\u8BA1\u5212\u5BA1\u6279",
     approve: "\u6279\u51C6",
     reject: "\u62D2\u7EDD",
+    approveInIde: "\u524D\u5F80 IDE \u6279\u51C6",
     tellClaudeWhatToChange: "\u63D0\u4FEE\u6539\u610F\u89C1",
     planFeedbackPlaceholder: "\u54EA\u91CC\u9700\u8981\u6539?",
     submitFeedback: "\u53D1\u9001",
@@ -226,6 +228,7 @@ const BUBBLE_STRINGS = {
     planReview: "計畫審查",
     approve: "允許",
     reject: "拒絕",
+    approveInIde: "前往 IDE 核准",
     tellClaudeWhatToChange: "提修改意見",
     planFeedbackPlaceholder: "哪裡需要改?",
     submitFeedback: "傳送",
@@ -281,6 +284,7 @@ const BUBBLE_STRINGS = {
     planReview: "\uACC4\uD68D \uAC80\uD1A0",
     approve: "\uC2B9\uC778",
     reject: "\uAC70\uBD80",
+    approveInIde: "IDE\uC5D0\uC11C \uC2B9\uC778",
     tellClaudeWhatToChange: "\uC218\uC815 \uC694\uCCAD",
     planFeedbackPlaceholder: "\uC5B4\uB514\uB97C \uBC14\uAFD4\uC57C \uD558\uB098\uC694?",
     submitFeedback: "\uBCF4\uB0B4\uAE30",
@@ -336,6 +340,7 @@ const BUBBLE_STRINGS = {
     planReview: "計画レビュー",
     approve: "承認",
     reject: "却下",
+    approveInIde: "IDE で承認",
     tellClaudeWhatToChange: "修正を提案",
     planFeedbackPlaceholder: "どこを変更すべき?",
     submitFeedback: "送信",
@@ -391,6 +396,7 @@ const BUBBLE_STRINGS = {
     planReview: "Revisão do plano",
     approve: "Aprovar",
     reject: "Recusar",
+    approveInIde: "Aprovar no IDE",
     tellClaudeWhatToChange: "Sugerir mudanças",
     planFeedbackPlaceholder: "O que deveria mudar?",
     submitFeedback: "Enviar",
@@ -446,6 +452,7 @@ const BUBBLE_STRINGS = {
     planReview: "Revisión del plan",
     approve: "Aprobar",
     reject: "Rechazar",
+    approveInIde: "Aprobar en el IDE",
     tellClaudeWhatToChange: "Sugerir cambios",
     planFeedbackPlaceholder: "¿Qué habría que cambiar?",
     submitFeedback: "Enviar",
@@ -1549,7 +1556,8 @@ function show(data) {
   }
 
   const isPlanReview = interactionIntent === "plan-review";
-  const canPlanFeedback = isPlanReview && interactionCapabilities.planFeedback === true;
+  const approveInIde = isPlanReview && data.approveInIde === true;
+  const canPlanFeedback = isPlanReview && !approveInIde && interactionCapabilities.planFeedback === true;
   // Issue #445: an MCP tool call (e.g. Codex + Vercel MCP) is not an OS
   // permission. For Codex MCP approvals, relabel the title and show a friendly
   // "server · tool" pill so "MCP__CODEX_APPS__VERCEL__LIST_PROJECTS" reads as
@@ -1563,7 +1571,7 @@ function show(data) {
   else if (mcp && data.isCodex) titleKey = "codexToolApproval";
   headerTitle.textContent = bubbleText(data.lang, titleKey);
   toolPill.style.display = isPlanReview ? "none" : "";
-  btnDeny.style.display = canPlanFeedback ? "none" : "";
+  btnDeny.style.display = canPlanFeedback || approveInIde ? "none" : "";
 
   // Tool pill — friendly "server · tool" for MCP, raw tool name otherwise
   toolPillText.textContent = mcp ? mcp.display : (data.toolName || "Unknown");
@@ -1575,7 +1583,9 @@ function show(data) {
   renderIrreversibleBadge(data, isPlanReview);
 
   // Button labels
-  btnAllow.textContent = isPlanReview ? bubbleText(data.lang, "approve") : bubbleText(data.lang, "allow");
+  btnAllow.textContent = isPlanReview
+    ? bubbleText(data.lang, approveInIde ? "approveInIde" : "approve")
+    : bubbleText(data.lang, "allow");
   btnDeny.textContent = isPlanReview ? bubbleText(data.lang, "reject") : bubbleText(data.lang, "deny");
 
   // Dynamic suggestion buttons
@@ -1590,7 +1600,7 @@ function show(data) {
       tellBtn.addEventListener("click", () => enterPlanFeedbackMode(data.lang));
       suggestionsContainer.appendChild(tellBtn);
     }
-    if (interactionCapabilities.nativeFallback === true) {
+    if (interactionCapabilities.nativeFallback === true && !approveInIde) {
       renderRegularTerminalFallback(data.lang);
     }
   } else {
@@ -1684,7 +1694,7 @@ btnAllow.addEventListener("click", () => {
   }
   btnAllow.textContent = "...";
   disableAll();
-  window.bubbleAPI.decide("allow");
+  window.bubbleAPI.decide(currentIsPlanReview && currentData.approveInIde === true ? "deny-and-focus" : "allow");
 });
 
 function focusCodexUserInput() {

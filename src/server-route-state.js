@@ -398,6 +398,9 @@ function handleStatePost(req, res, options) {
       const codexSource = typeof data.codex_source === "string" && data.codex_source.trim()
         ? data.codex_source.trim()
         : null;
+      const claudeEntrypoint = typeof data.claude_entrypoint === "string" && data.claude_entrypoint.trim()
+        ? data.claude_entrypoint.trim()
+        : null;
       const ghosttyTerminalId = typeof data.ghostty_terminal_id === "string" && data.ghostty_terminal_id.trim()
         ? data.ghostty_terminal_id.trim()
         : null;
@@ -1134,6 +1137,7 @@ function handleStatePost(req, res, options) {
             provider,
             codexOriginator,
             codexSource,
+            claudeEntrypoint,
             dshCarrier,
             ghosttyTerminalId,
             displayHint: display_svg,

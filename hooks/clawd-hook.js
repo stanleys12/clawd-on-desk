@@ -687,6 +687,7 @@ function buildStateBody(event, payload, resolve) {
   // omits it). state.js merges it stickily, so one report is enough.
   const model = normalizeModelId(payload.model);
   if (model) body.model = model;
+  if (process.env.CLAUDE_CODE_ENTRYPOINT) body.claude_entrypoint = process.env.CLAUDE_CODE_ENTRYPOINT;
   const toolName = typeof payload.tool_name === "string" && payload.tool_name ? payload.tool_name : null;
   const toolUseId = normalizeToolUseId(payload.tool_use_id ?? payload.toolUseId ?? payload.toolUseID);
   const toolInputFingerprint = buildToolInputFingerprint(

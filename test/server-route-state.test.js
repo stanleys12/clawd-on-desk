@@ -1538,6 +1538,7 @@ describe("server-route-state POST", () => {
         provider: "openai",
         codexOriginator: "codex_work_desktop",
         codexSource: "vscode",
+        claudeEntrypoint: null,
         dshCarrier: null,
         ghosttyTerminalId: "ghostty-term-7",
         displayHint: "display.svg",
@@ -1568,6 +1569,15 @@ describe("server-route-state POST", () => {
         },
       },
     ]]);
+  });
+
+  it("forwards the Claude Code entrypoint to updateSession", async () => {
+    const res = await callStatePost(JSON.stringify({
+      state: "working", event: "PreToolUse", session_id: "sid",
+      agent_id: "claude-code", claude_entrypoint: " claude-vscode ",
+    }));
+    assert.strictEqual(res.statusCode, 200);
+    assert.strictEqual(res.calls.updateSession[0][3].claudeEntrypoint, "claude-vscode");
   });
 
   it("forwards Qoder title inputs for runtime enrichment after accepting the lifecycle", async () => {

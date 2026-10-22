@@ -3205,6 +3205,7 @@ function buildPermissionBubblePayload(permEntry) {
       : null,
     lang: ctx.lang,
     interaction: isValidInteraction(permEntry.interaction) ? permEntry.interaction : null,
+    approveInIde: !!(sess && sess.claudeEntrypoint === "claude-vscode"),
     isElicitation: permEntry.isElicitation || false,
     isFamilyQuestion: permEntry.isFamilyQuestion === true,
     questionAwaitingDelivery: permEntry.questionAwaitingDelivery === true,

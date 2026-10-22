@@ -22,6 +22,10 @@ function interaction(intent, capabilities = {}) {
   };
 }
 
+function planReviewInteraction() {
+  return interaction("plan-review", { allowDeny: true, planFeedback: true, nativeFallback: true });
+}
+
 class ClassList {
   constructor() { this.values = new Set(); }
   add(...names) { names.forEach((name) => this.values.add(name)); }
@@ -333,18 +337,22 @@ describe("permission bubble terminal fallback (issue #689)", () => {
 
   it("keeps plan review's single terminal action and deny-and-focus semantics", () => {
     const harness = createHarness();
-    harness.show({
-      toolName: "ExitPlanMode",
-      interaction: interaction("plan-review", {
-        allowDeny: true,
-        planFeedback: true,
-        nativeFallback: true,
-      }),
-    });
+    harness.show({ toolName: "ExitPlanMode", interaction: planReviewInteraction() });
 
     const buttons = harness.terminalButtons();
     assert.strictEqual(buttons.length, 1);
     buttons[0].click();
+    assert.deepStrictEqual(harness.decisions, ["deny-and-focus"]);
+  });
+
+  it("sends IDE extension plan reviews back to the IDE", () => {
+    const harness = createHarness();
+    harness.show({ toolName: "ExitPlanMode", approveInIde: true, interaction: planReviewInteraction() });
+
+    assert.strictEqual(harness.element("btnAllow").textContent, "Approve in IDE");
+    assert.strictEqual(harness.element("btnDeny").style.display, "none");
+    assert.deepStrictEqual(harness.actionTexts(), []);
+    harness.element("btnAllow").click();
     assert.deepStrictEqual(harness.decisions, ["deny-and-focus"]);
   });
 });

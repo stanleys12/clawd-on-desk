@@ -178,6 +178,19 @@ describe("buildStateBody", () => {
     assert.strictEqual(body.model, "claude-opus-5");
   });
 
+  it("forwards the Claude Code entrypoint", () => {
+    const saved = process.env.CLAUDE_CODE_ENTRYPOINT;
+    try {
+      process.env.CLAUDE_CODE_ENTRYPOINT = "claude-vscode";
+      assert.strictEqual(buildStateBody("PreToolUse", { session_id: "s" }, mockResolve).claude_entrypoint, "claude-vscode");
+      delete process.env.CLAUDE_CODE_ENTRYPOINT;
+      assert.strictEqual(buildStateBody("PreToolUse", { session_id: "s" }, mockResolve).claude_entrypoint, undefined);
+    } finally {
+      if (saved === undefined) delete process.env.CLAUDE_CODE_ENTRYPOINT;
+      else process.env.CLAUDE_CODE_ENTRYPOINT = saved;
+    }
+  });
+
   it("omits model when SessionStart carries none (clear / some resume paths)", () => {
     const body = buildStateBody("SessionStart", { session_id: "sid-no-model" }, mockResolve);
     assert.strictEqual(body.model, undefined);
